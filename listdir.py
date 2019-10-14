@@ -27,21 +27,12 @@ def csv_save(path, csvfilename):
                 writer.writerow(row)
     return csv_save
 
-def read_csv(csvfilename):
-    """User can read an existing csv file"""
-    with open(csvfilename + '.csv', 'r') as readFile:
-        reader = csv.reader(readFile)
-        for row in reader:
-            print(','.join(row))
-
 def main():
     """Main function of the program"""
     parser = argparse.ArgumentParser()
     parser.add_argument('path',help = 'Path directory', type = str)
     parser.add_argument('csvfilename',help = 'CSV filename to be saved', type = str)
     parser.add_argument('-r','--read', help = 'Read an existing csv file.')
-    if args.read:
-        read_csv(args.csvfilename)
     args = parser.parse_args()
     find_path(args.path)
     csv_save(args.path,args.csvfilename)
