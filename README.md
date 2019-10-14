@@ -1,7 +1,8 @@
-# listdir.py
+# listdir.py with Hashes and Config File
 listdr.py is a script that will ask the user to provide a directory and the script will search all files and subdirectories and save it to a CSV file.
-The .csv file provides the parent directory, filename and the file size.
-
+The .csv file provides the parent directory, filename and the file size, md5, sha1.
+## Update
+Added a config file called listdir_hash.ini file where it will run a default value from the config file if the user didn't input anything. 
 ## Usage
 To use the script, do the following. The user **MUST** provide an existing directory and a csv filename.
 ```python
