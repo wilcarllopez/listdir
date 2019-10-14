@@ -1,4 +1,4 @@
-# listdr.py
+# listdir.py
 listdr.py is a script that will ask the user to provide a directory and the script will search all files and subdirectories and save it to a CSV file.
 The .csv file provides the parent directory, filename and the file size.
 
