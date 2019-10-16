@@ -6,11 +6,6 @@ import os
 import time
 import zipfile as zip
 
-# Variable for csv file
-csv_file = []
-directory = []
-
-
 # end of variable declaration
 
 # Start of functions
@@ -95,6 +90,7 @@ def zip_save(csvfilename):
 
 
 if __name__ == "__main__":
+    #Updates the config file
     update_ini()
     config = configparser.ConfigParser()
     config.read('listdir_hash.ini')
@@ -103,7 +99,8 @@ if __name__ == "__main__":
     parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'],
                         help='CSV filename to be saved')
     args = parser.parse_args()
-
+    #Setting up variables
     path = args.path
     csvfilename = args.csvfilename
+    #Start of the program
     find_path(path, csvfilename)
