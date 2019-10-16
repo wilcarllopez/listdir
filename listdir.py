@@ -46,7 +46,8 @@ def csv_save(path, csvfilename):
     config = configparser.ConfigParser()
     config.read('config.ini')
     datetime=config['datetime']['timestr']
-    with open(f"{csvfilename} {datetime}.csv", 'w+', newline='') as csvFile:
+    finalfilename = f"{csvfilename} {datetime}.csv"
+    with open(finalfilename, 'w+', newline='') as csvFile:
         headwriter = csv.DictWriter(csvFile, fieldnames=["Parent Directory", "Filename", "File Size", "MD5", "SHA-1"])
         headwriter.writeheader()
         writer = csv.writer(csvFile, delimiter=",")
@@ -58,7 +59,7 @@ def csv_save(path, csvfilename):
                 sha1 = sha1_hash(filepath)
                 row = [str(r), f, size, md5 , sha1 ]
                 writer.writerow(row)
-    zip_save(f"{csvfilename}.csv")
+    zip_save(finalfilename, csvfilename)
 
 
 def update_ini():
@@ -77,13 +78,13 @@ def update_ini():
         with open("config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
 
-def zip_save(csvfilename):
+def zip_save(finalfilename,csvfilename):
     """Save the csv file to zip file"""
     config = configparser.ConfigParser()
     config.read('config.ini')
     datetime = config['datetime']['timestr']
     with zip.ZipFile(f"{csvfilename} {datetime}.zip", 'w') as zipFile:
-        zipFile.write(csvfilename)
+        zipFile.write(finalfilename)
 # end of functions
 
 
