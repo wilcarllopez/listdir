@@ -66,7 +66,7 @@ def update_ini():
     """Updates the time and date for .ini file"""
     config = configparser.RawConfigParser()
     config.read('config.ini')
-    timestr = time.strftime("%Y%m%d-%I%M%S%p")
+    timestr = time.strftime("%Y%m%d-%I%M%S %p")
     try:
         config.set('datetime', 'timestr', timestr)
         with open("config.ini", 'w+') as cfgfile:
