@@ -6,8 +6,6 @@ import os
 import time
 import zipfile as zip
 
-# end of variable declaration
-
 # Start of functions
 def find_path(path, csvfilename):
     """Finding the directory of the pathname path"""
