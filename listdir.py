@@ -44,7 +44,7 @@ def csv_save(path, csvfilename):
     """csv_save function will get the files and subdirectories of the path provided
      by the user. Then it will be save as a csv file, name provided by the user."""
     config = configparser.ConfigParser()
-    config.read('listdir_hash.ini')
+    config.read('config.ini')
     datetime=config['datetime']['timestr']
     with open(f"{csvfilename} {datetime}.csv", 'w+', newline='') as csvFile:
         headwriter = csv.DictWriter(csvFile, fieldnames=["Parent Directory", "Filename", "File Size", "MD5", "SHA-1"])
@@ -64,23 +64,23 @@ def csv_save(path, csvfilename):
 def update_ini():
     """Updates the time and date for .ini file"""
     config = configparser.RawConfigParser()
-    config.read('listdir_hash.ini')
+    config.read('config.ini')
     timestr = time.strftime("%Y%m%d-%I%M%S%p")
     try:
         config.set('datetime', 'timestr', timestr)
-        with open("listdir_hash.ini", 'w+') as cfgfile:
+        with open("config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
     except config.NoSectionError:
         # Create non-existent section
         config.add_section('datetime')
         config.set('datetime', 'timestr', timestr)
-        with open("listdir_hash.ini", 'w+') as cfgfile:
+        with open("config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
 
 def zip_save(csvfilename):
     """Save the csv file to zip file"""
     config = configparser.ConfigParser()
-    config.read('listdir_hash.ini')
+    config.read('config.ini')
     datetime = config['datetime']['timestr']
     with zip.ZipFile(f"{csvfilename} {datetime}.zip", 'w') as zipFile:
         zipFile.write(csvfilename)
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     #Updates the config file
     update_ini()
     config = configparser.ConfigParser()
-    config.read('listdir_hash.ini')
+    config.read('config.ini')
     parser = argparse.ArgumentParser()
     parser.add_argument('path', nargs="?", default=config['default']['path'], help='Path directory')
     parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'],
