@@ -1,6 +1,6 @@
 include README.md
 include LICENSE.md
 include .gitignore
-include config.ini
+include listdir/config.ini
 include docs/requirements.txt
 include data.json
