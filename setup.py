@@ -14,6 +14,7 @@ setup(name='listdir',
             'Programming Language :: 3.7'
       ],
       data_files=None,
+      include_package_data = True,
       # scripts= ,
       entry_points={
             'console_scripts': [
