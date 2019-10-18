@@ -19,4 +19,5 @@ setup(name='listdir',
             'console_scripts': [
                   'listdir=listdir.listdir:main'
             ]
-      })
+      },
+      packages=['listdir'])
