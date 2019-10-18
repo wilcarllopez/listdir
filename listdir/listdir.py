@@ -10,7 +10,7 @@ import zipfile as zip
 def find_path(path, csvfilename):
     """Finding the directory of the pathname path"""
     os.chdir(path)
-    if os.path.exists(path) == True:
+    if os.path.exists(path) is True:
         csv_save(path, csvfilename)
     else:
         return "Path directory doesn't exists"
