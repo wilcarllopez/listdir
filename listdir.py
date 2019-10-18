@@ -5,13 +5,14 @@ import hashlib
 import os
 import time
 import zipfile as zip
+import zlib
 
 # Start of functions
-def find_path(path, csvfilename):
+def find_path(path, csvfilename, datetime):
     """Finding the directory of the pathname path"""
     os.chdir(path)
     if os.path.exists(path) == True:
-        csv_save(path, csvfilename)
+        csv_save(path, csvfilename, datetime)
     else:
         return "Path directory doesn't exists"
 
@@ -39,13 +40,11 @@ def md5_hash(filepath):
     md5 = hasher.hexdigest()
     return md5
 
-
-def csv_save(path, csvfilename):
+def csv_save(path, csvfilename, datetime):
     """csv_save function will get the files and subdirectories of the path provided
      by the user. Then it will be save as a csv file, name provided by the user."""
     config = configparser.ConfigParser()
     config.read('config.ini')
-    datetime=config['datetime']['timestr']
     finalfilename = f"{csvfilename} {datetime}.csv"
     with open(finalfilename, 'w+', newline='') as csvFile:
         headwriter = csv.DictWriter(csvFile, fieldnames=["Parent Directory", "Filename", "File Size", "MD5", "SHA-1"])
@@ -59,12 +58,11 @@ def csv_save(path, csvfilename):
                 sha1 = sha1_hash(filepath)
                 row = [str(r), f, size, md5 , sha1 ]
                 writer.writerow(row)
-    zip_save(finalfilename, csvfilename)
-
+    zip_save(finalfilename, csvfilename, datetime)
 
 def update_ini():
     """Updates the time and date for .ini file"""
-    config = configparser.RawConfigParser()
+    config = configparser.ConfigParser()
     config.read('config.ini')
     timestr = time.strftime("%Y%m%d-%I%M%S %p")
     try:
@@ -78,13 +76,14 @@ def update_ini():
         with open("config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
 
-def zip_save(finalfilename,csvfilename):
+def zip_save(finalfilename,csvfilename,datetime):
+    try:
+        compression = zip.ZIP_DEFLATED
+    except:
+        compression = zip.ZIP_STORED
     """Save the csv file to zip file"""
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    datetime = config['datetime']['timestr']
-    with zip.ZipFile(f"{csvfilename} {datetime}.zip", 'w') as zipFile:
-        zipFile.write(finalfilename)
+    with zip.ZipFile(f'{csvfilename} {datetime}.zip', 'w', compresslevel=None) as zipFile:
+        zipFile.write(finalfilename, compress_type=compression)
 # end of functions
 
 
@@ -95,11 +94,11 @@ if __name__ == "__main__":
     config.read('config.ini')
     parser = argparse.ArgumentParser()
     parser.add_argument('path', nargs="?", default=config['default']['path'], help='Path directory')
-    parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'],
-                        help='CSV filename to be saved')
+    parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'], help='CSV filename to be saved')
     args = parser.parse_args()
     #Setting up variables
     path = args.path
     csvfilename = args.csvfilename
+    datetime = config['datetime']['timestr']
     #Start of the program
-    find_path(path, csvfilename)
+    find_path(path, csvfilename, datetime)
