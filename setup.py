@@ -6,4 +6,11 @@ setup(name='listdir',
       url='https://github.com/wilcarllopez/listdir/tree/packaging',
       author='Wilcarl D. Lopez',
       author_email='wilcarl_lopez@trendmicro.com',
-      license='MIT')
+      license='MIT',
+      classifiers=[
+            'Development Status :: Alpha',
+            'Intended Audience :: Sir Anwar Sumawang',
+            'Programming Language :: 3',
+            'Programming Language :: 3.7'
+      ],
+      data_files=None)
