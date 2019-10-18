@@ -21,4 +21,4 @@ setup(name='listdir',
                   'listdir=listdir.listdir:main'
             ]
       },
-      packages=['listdir'])
+      packages='listdir')

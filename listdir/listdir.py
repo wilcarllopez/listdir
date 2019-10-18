@@ -63,18 +63,17 @@ def csv_save(path, csvfilename, datetime):
 def update_ini():
     """Updates the time and date for .ini file"""
     config = configparser.ConfigParser()
-    dir = os.path.dirname(__file__)
-    config.read(dir + 'config.ini')
+    config.read('config.ini')
     timestr = time.strftime("%Y%m%d-%I%M%S %p")
     try:
         config.set('datetime', 'timestr', timestr)
-        with open(dir+"config.ini", 'w+') as cfgfile:
+        with open("config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
     except config.NoSectionError:
         # Create non-existent section
         config.add_section('datetime')
         config.set('datetime', 'timestr', timestr)
-        with open(dir+"config.ini", 'w+') as cfgfile:
+        with open("config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
 
 def zip_save(finalfilename,csvfilename,datetime):
