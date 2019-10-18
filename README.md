@@ -19,7 +19,25 @@ positional arguments:
 optional arguments:
   -h, --help   show this help message and exit
 ```
-
+## Pytest
+To use the test.py from the .\tests folder. User must install pytest.
+To use test, type the following:
+```
+pytest test.py
+```
+To check the coverage, install pytest-cov then type:
+```
+pytest --cov=listdir test.py
+```
+Below shows the coverage
+```
+Name                                                                      Stmts   Miss  Cover
+---------------------------------------------------------------------------------------------
+C:\Users\TEU_USER\Documents\Python Training\listdir\listdir\__init__.py       1      0   100%
+C:\Users\TEU_USER\Documents\Python Training\listdir\listdir\listdir.py       70     24    66%
+---------------------------------------------------------------------------------------------
+TOTAL                                                                        71     24    66%
+```
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
