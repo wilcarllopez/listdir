@@ -62,20 +62,20 @@ def csv_save(path, csvfilename, datetime):
 
 def update_ini():
     """Updates the time and date for .ini file"""
-    config = configparser.ConfigParser()
-
+    config = configparser.RawConfigParser()
     config.read('config.ini')
     timestr = time.strftime("%Y%m%d-%I%M%S %p")
-    try:
-        config.set('datetime', 'timestr', timestr)
-        with open("config.ini", 'w+') as cfgfile:
-            config.write(cfgfile)
-    except config.NoSectionError:
-        # Create non-existent section
-        config.add_section('datetime')
-        config.set('datetime', 'timestr', timestr)
-        with open("config.ini", 'w+') as cfgfile:
-            config.write(cfgfile)
+    #try:
+    config.add_section('datetime')
+    config.set('datetime', 'timestr', timestr)
+    with open("config.ini", 'w+') as cfgfile:
+       config.write(cfgfile)
+    #except config.NoSectionError:
+    #    # Create non-existent section
+    #    config.add_section('datetime')
+    #    config.set('datetime', 'timestr', timestr)
+    #    with open("config.ini", 'w+') as cfgfile:
+    #        config.write(cfgfile)
 
 def zip_save(finalfilename,csvfilename,datetime):
     try:
@@ -89,10 +89,13 @@ def zip_save(finalfilename,csvfilename,datetime):
 
 def main():
     # Updates the config file
-    update_ini()
     config = configparser.ConfigParser()
     dir = os.path.dirname(__file__)
     config.read(dir+'config.ini')
+    timestr = time.strftime("%Y%m%d-%I%M%S %p")
+    config.set('datetime', 'timestr', timestr)
+    with open("config.ini", 'w+') as cfgfile:
+        config.write(cfgfile)
     parser = argparse.ArgumentParser()
     parser.add_argument('path', nargs="?", default=config['default']['path'], help='Path directory')
     parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'],
