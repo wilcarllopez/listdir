@@ -64,35 +64,35 @@ def update_ini():
     """Updates the time and date for .ini file"""
     config = configparser.ConfigParser()
     dir = os.path.dirname(__file__)
-    config.read(dir + '/config.ini')
+    config.read(dir + 'config.ini')
     timestr = time.strftime("%Y%m%d-%I%M%S %p")
     try:
         config.set('datetime', 'timestr', timestr)
-        with open(path+"/config.ini", 'w+') as cfgfile:
+        with open(dir+"config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
     except config.NoSectionError:
         # Create non-existent section
         config.add_section('datetime')
         config.set('datetime', 'timestr', timestr)
-        with open(path+"/config.ini", 'w+') as cfgfile:
+        with open(dir+"config.ini", 'w+') as cfgfile:
             config.write(cfgfile)
 
-def zip_save(finalfilename,csvfilename,dateme}.zip', 'w', compresslevel=None) as zipFile:
-        zipFile.write(finalfilename, compress_type=comprestime):
+def zip_save(finalfilename,csvfilename,datetime):
     try:
         compression = zip.ZIP_DEFLATED
     except:
         compression = zip.ZIP_STORED
     """Save the csv file to zip file"""
-    with zip.ZipFile(f'{csvfilename} {datetision)
+    with zip.ZipFile(f'{csvfilename} {datetime}.zip', 'w', compresslevel=None) as zipFile:
+        zipFile.write(finalfilename, compress_type=compression)
 # end of functions
 
 def main():
     # Updates the config file
+    update_ini()
     config = configparser.ConfigParser()
     dir = os.path.dirname(__file__)
-    config.read(dir+'/config.ini')
-    update_ini()
+    config.read(dir+'config.ini')
     parser = argparse.ArgumentParser()
     parser.add_argument('path', nargs="?", default=config['default']['path'], help='Path directory')
     parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'],
