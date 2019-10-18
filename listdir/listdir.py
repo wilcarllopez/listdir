@@ -66,10 +66,16 @@ def update_ini():
 
     config.read('config.ini')
     timestr = time.strftime("%Y%m%d-%I%M%S %p")
-
-    config.set('datetime', 'timestr', timestr)
-    with open("config.ini", 'w+') as cfgfile:
-        config.write(cfgfile)
+    try:
+        config.set('datetime', 'timestr', timestr)
+        with open("config.ini", 'w+') as cfgfile:
+            config.write(cfgfile)
+    except config.NoSectionError:
+        # Create non-existent section
+        config.add_section('datetime')
+        config.set('datetime', 'timestr', timestr)
+        with open("config.ini", 'w+') as cfgfile:
+            config.write(cfgfile)
 
 def zip_save(finalfilename,csvfilename,datetime):
     try:
