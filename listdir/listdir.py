@@ -78,7 +78,7 @@ def main():
     # Updates the config file
     config = configparser.ConfigParser()
     dir = os.path.dirname(__file__)
-    config.read(path + '\config.ini')
+    config.read(dir + '\config.ini')
     parser = argparse.ArgumentParser()
     parser.add_argument('path', nargs="?", default=config['default']['path'], help='Path directory')
     parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'],
