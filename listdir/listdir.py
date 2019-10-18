@@ -5,7 +5,6 @@ import hashlib
 import os
 import time
 import zipfile as zip
-import zlib
 
 # Start of functions
 def find_path(path, csvfilename):
