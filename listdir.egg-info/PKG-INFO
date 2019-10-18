@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: listdir
+Version: 0.1.0
+Summary: Script for producing a zip and csv file of the path directory provided
+Home-page: https://github.com/wilcarllopez/listdir/tree/packaging
+Author: Wilcarl D. Lopez
+Author-email: wilcarl_lopez@trendmicro.com
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: Alpha
+Classifier: Intended Audience :: Sir Anwar Sumawang
+Classifier: Programming Language :: 3
+Classifier: Programming Language :: 3.7
