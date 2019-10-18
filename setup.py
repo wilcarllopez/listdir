@@ -13,4 +13,10 @@ setup(name='listdir',
             'Programming Language :: 3',
             'Programming Language :: 3.7'
       ],
-      data_files=None)
+      data_files=None,
+      # scripts= ,
+      entry_points={
+            'console_scripts': [
+                  'listdir=listdir.listdir:main'
+            ]
+      })
