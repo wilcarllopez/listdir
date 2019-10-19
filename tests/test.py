@@ -1,21 +1,36 @@
 from listdir import listdir
-import os
 import time
+import pytest
+import os
+import hashlib
 
-testfile = "testfile"
+testfile = ["testfile", "testfile2" , "testfile3", "testfile4", "testfile5"]
+filelist = ["testfile.txt","testfile2.txt","testfile3.txt"]
+path = "."
 filepath = "testfile.txt"
 filepath2 = "testfile2.txt"
-filepath3 = "testfile2.txt"
+filepath3 = "testfile3.txt"
 timestr = time.strftime("%Y%m%d-%I%M%S %p")
 
 def test_zip_save():
-    assert listdir.zip_save(filepath,f'{testfile} {listdir.timestamp_name()}') == listdir.zip_save(filepath,f'{testfile} {timestr}')
+    for text in filelist:
+        blocksize = 65536
+        hasher = hashlib.sha1()
+        with open(text, 'rb') as file:
+            buf = file.read(blocksize)
+            while len(buf) > 0:
+                hasher.update(buf)
+                buf = file.read(blocksize)
+        sha1 = hasher.hexdigest()
+        assert listdir.zip_save(filepath,f'{sha1} {listdir.timestamp_name()}') == listdir.zip_save(filepath,f'{sha1} {timestr}')
 
 def test_timestamp_name():
-    assert (f'{testfile} {listdir.timestamp_name()}') == (f'{testfile} {timestr}')
+    for file in testfile:
+        assert (f'{file} {listdir.timestamp_name()}') == (f'{file} {timestr}')
 
 def test_csv_save():
-    assert listdir.csv_save(filepath,f'{testfile} {listdir.timestamp_name()}')  == listdir.csv_save(filepath,f'{testfile} {timestr}')
+    for file in testfile:
+        assert listdir.csv_save(filepath,f'{file} {listdir.timestamp_name()}')  == listdir.csv_save(filepath,f'{file} {timestr}')
 
 def test_sha1_hash():
     assert listdir.sha1_hash(filepath), "6a4b4559254b5f6f9b1f23bac25b075f7fc5a05c"
@@ -24,6 +39,10 @@ def test_sha1_hash():
 def test_md5_hash():
     assert listdir.md5_hash(filepath), "032ca7234a799c1b56d198d6ff321fc0"
 
+def test_find_path():
+    assert os.path.exists(".")
+    assert listdir.find_path(path,filepath) == test_csv_save()
+
 
 if __name__ == '__main__':
-    unittest.main()
+    pytest.main()
