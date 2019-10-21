@@ -41,7 +41,7 @@ def test_md5_hash():
 
 def test_find_path():
     assert os.path.exists(path)
-    assert listdir.find_path(path,filepath) == test_csv_save()
+    assert listdir.find_path(path) == True
 
 
 if __name__ == '__main__':
