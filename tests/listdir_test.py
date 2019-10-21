@@ -3,6 +3,7 @@ import time
 import pytest
 import os
 import hashlib
+import logging
 
 path = os.path.dirname(os.path.abspath(__file__))
 testfile = ["testfile", "testfile2" , "testfile3", "testfile4", "testfile5"]
