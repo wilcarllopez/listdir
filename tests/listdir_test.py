@@ -1,4 +1,4 @@
-from listdir import listdir
+from listdir import *
 import time
 import pytest
 import os
@@ -33,6 +33,10 @@ def test_csv_save():
     for file in testfile:
         assert listdir.csv_save(filepath,f'{file} {listdir.timestamp_name()}')  == listdir.csv_save(filepath,f'{file} {timestr}')
 
+def test_json_save():
+    for file in testfile:
+        assert listdir.json_save(filepath,f'{file} {listdir.timestamp_name()}')  == listdir.json_save(filepath,f'{file} {timestr}')
+
 def test_sha1_hash():
     assert listdir.sha1_hash(filepath), "6a4b4559254b5f6f9b1f23bac25b075f7fc5a05c"
     assert listdir.sha1_hash(filepath2), "da39a3ee5e6b4b0d3255bfef95601890afd80709"
@@ -43,7 +47,6 @@ def test_md5_hash():
 def test_find_path():
     assert os.path.exists(path)
     assert listdir.find_path(path) == True
-
 
 if __name__ == '__main__':
     pytest.main()

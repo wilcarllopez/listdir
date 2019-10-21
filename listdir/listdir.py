@@ -31,16 +31,17 @@ def setup_logging(default_path='loggingConfig.yaml', default_level=logging.INFO,
         logging.basicConfig(level=default_level, stream=sys.stdout)
         print('Failed to load configuration file. Using default configs')
 
-def find_path(path):
+def find_path(path,csvfilename):
     """Finding the directory of the pathname path"""
     logger.info("Finding the path: " + path)
     os.chdir(path)
     if os.path.exists(path) is True:
         logger.info("Path: " + path +" found!")
-        return find_path(path)
+        csv_save(path,csvfilename)
+        return True
     else:
         logger.error("Path directory doesn't exists")
-        return find_path(path)
+        return False
 
 def sha1_hash(filepath):
     """Hashing the file through SHA-1"""
@@ -161,20 +162,16 @@ def main():
     parser.add_argument('path', nargs="?", default=config['default']['path'], help='Path directory')
     parser.add_argument('csvfilename', nargs="?", default=config['default']['csvfilename'],
                         help='CSV filename to be saved')
-    parser.add_argument('-c', '--csv', action='store_true', help='Writes the file to csv')
     parser.add_argument('-j','--js', action='store_true', help='Writes the file to json')
     args = parser.parse_args()
     # Setting up variables
     path = os.path.abspath(args.path)
     csvfilename = args.csvfilename
     # Start of the program
-    if args.csv:
-        find_path(path)
-        csv_save(path, csvfilename)
-    elif args.js:
-        find_path(path)
+    if args.js:
         json_save(path, csvfilename)
-
+    else:
+        find_path(path, csvfilename)
 # end of functions
 
 if __name__ == "__main__":
