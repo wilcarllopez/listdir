@@ -25,9 +25,9 @@ def setup_logging(default_path='loggingConfig.yaml', default_level=logging.INFO,
                 logging.config.dictConfig(config)
             except Exception as e:
                 print('Error in Logging Configuration. Using default configs', e)
-                logging.basicConfig(level=default_level, stream=sys.stdout, filename=listdir_info.log)
+                logging.basicConfig(level=default_level, stream=sys.stdout)
     else:
-        logging.basicConfig(level=default_level, stream=sys.stdout, filename=listdir_info.log)
+        logging.basicConfig(level=default_level, stream=sys.stdout)
         print('Failed to load configuration file. Using default configs')
 
 def find_path(path, csvfilename):
