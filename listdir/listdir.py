@@ -33,14 +33,18 @@ def setup_logging(default_path='loggingConfig.yaml', default_level=logging.INFO,
 
 def find_path(path):
     """Finding the directory of the pathname path"""
-    logger.info("Finding the path: " + path)
-    os.chdir(path)
-    if os.path.exists(path) is True:
-        logger.info("Path: " + path +" found!")
-        return True
-    else:
+    try:
+        logger.info("Finding the path: " + path)
+        os.chdir(path)
+        if os.path.exists(path) is True:
+            logger.info("Path: " + path +" found!")
+            return True
+        else:
+            logger.error("Path directory doesn't exists")
+            sys.exit()
+    except FileNotFoundError:
         logger.error("Path directory doesn't exists")
-        return False
+        sys.exit()
 
 def sha1_hash(filepath):
     """Hashing the file through SHA-1"""
@@ -77,6 +81,7 @@ def md5_hash(filepath):
 def csv_save(path, csvfilename):
     """csv_save function will get the files and subdirectories of the path provided
      by the user. Then it will be save as a csv file, name provided by the user."""
+    global finalfilename
     try:
         finalfilename = f"{csvfilename} {str(timestamp_name())}.csv"
         with open(finalfilename, 'w+', newline='') as csvFile:
@@ -103,6 +108,7 @@ def csv_save(path, csvfilename):
 def json_save(path, csvfilename):
     """csv_save function will get the files and subdirectories of the path provided
      by the user. Then it will be save as a csv file, name provided by the user."""
+    global finalfilename
     try:
         finalfilename = f"{csvfilename} {str(timestamp_name())}.json"
         with open(finalfilename, 'w+', newline='') as jsonFile:
@@ -179,5 +185,6 @@ def main():
 if __name__ == "__main__":
     setup_logging() #Setting up the logging config
     logger = logging.getLogger(__name__)
+    logger.info("Creating new log file")
     logger.info("Logging setup completed")
     main()
