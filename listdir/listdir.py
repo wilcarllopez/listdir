@@ -22,6 +22,7 @@ class Password(argparse.Action):
             values = getpass.getpass()
         setattr(namespace, self.dest, values)
 # End of class
+
 # Start of functions
 def setup_logging(default_path='loggingConfig.yaml', default_level=logging.INFO, env_key='LOG_CFG'):
     """Setting up the logging config"""
@@ -42,7 +43,7 @@ def setup_logging(default_path='loggingConfig.yaml', default_level=logging.INFO,
         print('Failed to load configuration file. Using default configs')
 
 def config(section='postgresql'):
-    """"""
+    """Checks the config file for the user,host and port"""
     config = configparser.ConfigParser()
     dir = os.path.dirname(os.path.abspath(__file__))
     config.read(dir + os.sep + 'config.ini')
@@ -61,7 +62,12 @@ def dbase_connect(password, path):
     try:
         params = config()
         connection = psycopg2.connect(password = password,**params)
+        connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = connection.cursor()
+        # cursor.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'listdir_db' AND pid <> pg_backend_pid();")
+        # connection.commit()
+        # cursor.execute("DROP DATABASE listdir_db")
+        # connection.commit()
         cursor.execute("SELECT exists(SELECT 1 from pg_catalog.pg_database WHERE datname = 'listdir_db');")
 
         if cursor.fetchone()[0]:
@@ -77,7 +83,7 @@ def dbase_connect(password, path):
                         md5 = md5_hash(filepath)
                         sha1 = sha1_hash(filepath)
                         row = (str(r), f, size, md5, sha1)
-                        insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1) 
+                        insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1)
                                                                                                 values (%s, %s, %s, %s, %s)'''
                         cursor.execute(insert_table_query, row)
                         connection.commit()
@@ -101,7 +107,7 @@ def dbase_connect(password, path):
                         md5 = md5_hash(filepath)
                         sha1 = sha1_hash(filepath)
                         row = (str(r), f, size, md5, sha1)
-                        insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1) 
+                        insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1)
                                                                                                 values (%s, %s, %s, %s, %s)'''
                         cursor.execute(insert_table_query, row)
                         connection.commit()
@@ -136,7 +142,7 @@ def dbase_connect(password, path):
                     md5 = md5_hash(filepath)
                     sha1 = sha1_hash(filepath)
                     row = (str(r), f, size, md5, sha1)
-                    insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1) 
+                    insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1)
                                                                                 values (%s, %s, %s, %s, %s)'''
                     cursor.execute(insert_table_query, row)
                     connection.commit()
