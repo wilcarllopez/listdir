@@ -10,8 +10,18 @@ import logging
 import yaml
 import sys
 import json
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+import getpass
 
-
+# Start of class
+class Password(argparse.Action):
+    """Class to set password to be hidden"""
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values is None:
+            values = getpass.getpass()
+        setattr(namespace, self.dest, values)
+# End of class
 # Start of functions
 def setup_logging(default_path='loggingConfig.yaml', default_level=logging.INFO, env_key='LOG_CFG'):
     """Setting up the logging config"""
@@ -30,6 +40,121 @@ def setup_logging(default_path='loggingConfig.yaml', default_level=logging.INFO,
     else:
         logging.basicConfig(level=default_level, stream=sys.stdout)
         print('Failed to load configuration file. Using default configs')
+
+def config(section='postgresql'):
+    """"""
+    config = configparser.ConfigParser()
+    dir = os.path.dirname(os.path.abspath(__file__))
+    config.read(dir + os.sep + 'config.ini')
+    db = {}
+    if config.has_section(section):
+        params = config.items(section)
+        for param in params:
+            db[param[0]] = param[1]
+    else:
+        raise Exception('Section {0} not found in the file'.format(section))
+    return db
+
+def dbase_connect(password, path):
+    """Connects to a database and CRUD function"""
+    global connection
+    try:
+        params = config()
+        connection = psycopg2.connect(password = password,**params)
+        cursor = connection.cursor()
+        cursor.execute("SELECT exists(SELECT 1 from pg_catalog.pg_database WHERE datname = 'listdir_db');")
+
+        if cursor.fetchone()[0]:
+            connection = psycopg2.connect(password=password, database='listdir_db', **params)
+            cursor = connection.cursor()
+            logger.info("Connected to the database")
+            cursor.execute("SELECT to_regclass('test');")
+            if cursor.fetchone()[0]:
+                for r, d, files in os.walk(path):
+                    for f in files:
+                        filepath = "{}{}{}".format(r, os.sep, f)
+                        size = os.path.getsize(filepath)
+                        md5 = md5_hash(filepath)
+                        sha1 = sha1_hash(filepath)
+                        row = (str(r), f, size, md5, sha1)
+                        insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1) 
+                                                                                                values (%s, %s, %s, %s, %s)'''
+                        cursor.execute(insert_table_query, row)
+                        connection.commit()
+            else:
+                create_table_query = '''CREATE TABLE test(
+                                                    ID SERIAL PRIMARY KEY,
+                                                    DIRECTORY VARCHAR NOT NULL,
+                                                    FILENAME VARCHAR NOT NULL,
+                                                    FILESIZE INT NOT NULL,
+                                                    MD5 VARCHAR NOT NULL,
+                                                    SHA1 VARCHAR NOT NULL,
+                                                    created_at TIMESTAMP DEFAULT NOW()
+                                                    )'''
+                cursor.execute(create_table_query)
+                logger.info("Successfully created a database table 'test'")
+                connection.commit()
+                for r, d, files in os.walk(path):
+                    for f in files:
+                        filepath = "{}{}{}".format(r, os.sep, f)
+                        size = os.path.getsize(filepath)
+                        md5 = md5_hash(filepath)
+                        sha1 = sha1_hash(filepath)
+                        row = (str(r), f, size, md5, sha1)
+                        insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1) 
+                                                                                                values (%s, %s, %s, %s, %s)'''
+                        cursor.execute(insert_table_query, row)
+                        connection.commit()
+
+            connection.commit()
+            cursor.close()
+            connection.close()
+            logger.info("Successfully inserted values to database table 'test'")
+        else:
+            create_database = '''CREATE DATABASE listdir_db;'''
+            cursor.execute(create_database)
+            connection.commit()
+            logger.info("Successfully created database 'listdir_db'")
+            connection = psycopg2.connect(password = password, database = 'listdir_db', **params)
+            cursor = connection.cursor()
+            create_table_query = '''CREATE TABLE test(
+                                                    ID SERIAL PRIMARY KEY,
+                                                    DIRECTORY VARCHAR NOT NULL,
+                                                    FILENAME VARCHAR NOT NULL,
+                                                    FILESIZE INT NOT NULL,
+                                                    MD5 VARCHAR NOT NULL,
+                                                    SHA1 VARCHAR NOT NULL,
+                                                    created_at TIMESTAMP DEFAULT NOW()
+                                                    )'''
+            cursor.execute(create_table_query)
+            connection.commit()
+            logger.info("Successfully created a database table 'test'")
+            for r, d, files in os.walk(path):
+                for f in files:
+                    filepath = "{}{}{}".format(r, os.sep, f)
+                    size = os.path.getsize(filepath)
+                    md5 = md5_hash(filepath)
+                    sha1 = sha1_hash(filepath)
+                    row = (str(r), f, size, md5, sha1)
+                    insert_table_query = '''INSERT INTO test (DIRECTORY, FILENAME, FILESIZE, MD5, SHA1) 
+                                                                                values (%s, %s, %s, %s, %s)'''
+                    cursor.execute(insert_table_query, row)
+                    connection.commit()
+
+            cursor.close()
+            connection.close()
+            logger.info("Successfully inserted values to database table 'test'")
+        cursor.close()
+        connection.close()
+
+    except (Exception, psycopg2.Error) as error:
+        logger.error("Error while connecting to PostgreSQL", error)
+    finally:
+        # closing database connection.
+        if connection:
+            cursor.close()
+            connection.close()
+            logger.info("PostgreSQL connection is closed")
 
 def find_path(path):
     """Finding the directory of the pathname path"""
@@ -158,6 +283,8 @@ def zip_save(finalfilename, csvfilename):
         logger.error("Unable to create zip file")
 
 def main():
+
+
     """Main function of the program"""
     # Updates the config file
     config = configparser.ConfigParser()
@@ -169,17 +296,23 @@ def main():
                         help='CSV filename to be saved')
     parser.add_argument('-j','--js', action='store_true', help='Writes the file to json')
     parser.add_argument('-c', '--csv', action='store_true', help='Writes the file to csv')
+    parser.add_argument('-p', '--postgres', action='store_true', help='Writes the file to a database')
+    parser.add_argument("-pwd", "--password", action=Password, nargs='?', dest='password',
+                        help='Password for the database')
     args = parser.parse_args()
     # Setting up variables
     path = os.path.abspath(args.path)
     csvfilename = args.csvfilename
     # Start of the program
     if args.js:
-        json_save(path)
+        find_path(path)
         json_save(path,csvfilename)
     elif args.csv:
         find_path(path)
         csv_save(path, csvfilename)
+    elif args.postgres:
+        password = args.password
+        dbase_connect(password, path)
 # end of functions
 
 if __name__ == "__main__":
