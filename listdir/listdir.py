@@ -13,6 +13,7 @@ import json
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import getpass
+import pika
 
 # Start of class
 class Password(argparse.Action):
@@ -259,14 +260,41 @@ def json_save(path, csvfilename):
                         "MD5": md5,
                         "SHA-1": sha1
                     })
-                    json.dump(data, jsonFile, indent=2)
+                    row = json.dump(data, jsonFile, indent=2)
+
                     logger.info("The filename: " + f + " with directory: " + str(r) + " size: " + str(size) + " with corresponding MD5 and SHA-1 values was added to JSON file")
     except:
         logger.error("Unable to write a JSON file")
     logger.info("Created a time string info of year,month,date-hour,min,second and meridian: " + timestamp_name())
     logger.info("Successfully created " + finalfilename)
     zip_save(finalfilename, csvfilename)
-    return 'Success'
+    return row
+
+def save_dict(path):
+    global data
+    for r, d, files in os.walk(path):
+        for f in files:
+            filepath = "{}{}{}".format(r, os.sep, f)
+            size = os.path.getsize(filepath)
+            md5 = md5_hash(filepath)
+            sha1 = sha1_hash(filepath)
+            data = {}
+            data[f] = []
+            data[f].append({
+                'Parent Directory': str(r),
+                "Filename": f,
+                "File Size": size,
+                "MD5": md5,
+                "SHA-1": sha1
+            })
+    return data
+def send_queue(data):
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='listdir')
+    for d in data:
+        channel.basic_publish(exchange='', routing_key='listdir', body=d)
+    connection.close()
 
 def timestamp_name():
     """Updates the time and date for .ini file"""
@@ -289,8 +317,6 @@ def zip_save(finalfilename, csvfilename):
         logger.error("Unable to create zip file")
 
 def main():
-
-
     """Main function of the program"""
     # Updates the config file
     config = configparser.ConfigParser()
@@ -303,6 +329,7 @@ def main():
     parser.add_argument('-j','--js', action='store_true', help='Writes the file to json')
     parser.add_argument('-c', '--csv', action='store_true', help='Writes the file to csv')
     parser.add_argument('-p', '--postgres', action='store_true', help='Writes the file to a database')
+    parser.add_argument('-q', '--queue', action='store_true', help='Sends the json to a queue')
     parser.add_argument("-pwd", "--password", action=Password, nargs='?', dest='password',
                         help='Password for the database')
     args = parser.parse_args()
@@ -319,6 +346,9 @@ def main():
     elif args.postgres:
         password = args.password
         dbase_connect(password, path)
+    elif args.queue:
+        save_dict(path)
+        send_queue(data)
 # end of functions
 
 if __name__ == "__main__":
