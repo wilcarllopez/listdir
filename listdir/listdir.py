@@ -65,10 +65,6 @@ def dbase_connect(password, path):
         connection = psycopg2.connect(password = password,**params)
         connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cursor = connection.cursor()
-        # cursor.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'listdir_db' AND pid <> pg_backend_pid();")
-        # connection.commit()
-        # cursor.execute("DROP DATABASE listdir_db")
-        # connection.commit()
         cursor.execute("SELECT exists(SELECT 1 from pg_catalog.pg_database WHERE datname = 'listdir_db');")
 
         if cursor.fetchone()[0]:
@@ -271,14 +267,13 @@ def json_save(path, csvfilename):
     return row
 
 def save_dict(path):
-    global data
+    data = {}
     for r, d, files in os.walk(path):
         for f in files:
             filepath = "{}{}{}".format(r, os.sep, f)
             size = os.path.getsize(filepath)
             md5 = md5_hash(filepath)
             sha1 = sha1_hash(filepath)
-            data = {}
             data[f] = []
             data[f].append({
                 'Parent Directory': str(r),
@@ -288,12 +283,14 @@ def save_dict(path):
                 "SHA-1": sha1
             })
     return data
+
 def send_queue(data):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     channel.queue_declare(queue='listdir')
-    for d in data:
-        channel.basic_publish(exchange='', routing_key='listdir', body=d)
+    for d in data.values():
+        channel.basic_publish(exchange='', routing_key='listdir', body=str(d))
+        logger.info("Sent " + str(d) + " to the queue.")
     connection.close()
 
 def timestamp_name():
@@ -347,7 +344,7 @@ def main():
         password = args.password
         dbase_connect(password, path)
     elif args.queue:
-        save_dict(path)
+        data = save_dict(path)
         send_queue(data)
 # end of functions
 
